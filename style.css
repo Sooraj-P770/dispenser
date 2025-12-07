@@ -1,0 +1,164 @@
+/* Basic Reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Body + background */
+body {
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(135deg,#0f2240 0%, #2f5aa8 60%, #527199 100%);
+    color: #f4f7fb;
+    min-height: 100vh;
+}
+
+/* Top navigation */
+.topnav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px;
+    position: fixed;
+    left: 0; right: 0; top: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.18);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.topnav .logo { font-weight: 700; font-size: 20px; }
+.topnav nav a {
+    margin-left: 16px; color: #eef4ff; text-decoration: none; cursor:pointer;
+}
+.topnav nav a.cta {
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Screen container */
+main { padding-top: 84px; }
+
+/* General screen styles */
+.screen { display: none; padding: 40px 20px; }
+.screen.active { display: block; }
+
+/* Card */
+.card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 22px;
+    max-width: 760px;
+    margin: 18px auto;
+    box-shadow: 0 6px 20px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* Home layout */
+.home-layout {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px 120px;
+    flex-wrap: wrap;
+}
+
+.home-left { max-width: 520px; text-align: left; }
+.home-left h1 { font-size: 44px; line-height: 1.02; margin-bottom: 12px; color: #fff; }
+.lead { color: rgba(255,255,255,0.85); margin-bottom: 18px; }
+
+/* Buttons */
+button {
+    cursor: pointer;
+    background: linear-gradient(180deg,#3aa0ff, #007bff);
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+button:hover { transform: translateY(-3px); box-shadow: 0 8px 26px rgba(2,10,40,0.45); }
+button.outline {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* small helpers */
+.hidden-block { display: none; margin-top: 14px; }
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin: 8px 0 12px;
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+}
+.lbl { display:block; text-align:left; margin:8px 0 4px; color: rgba(255,255,255,0.85); }
+
+.form-actions { display:flex; gap:12px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+
+/* Bed grid on selection screens */
+.bed-grid { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
+.bed-grid button { min-width:140px; }
+
+/* Robot card */
+.robot-card { text-align:center; }
+.robot-caption { margin-top: 10px; color: rgba(255,255,255,0.9); }
+
+/* CSS Robot (simple & animated) */
+.robot {
+    width: 160px;
+    height: 220px;
+    margin: auto;
+    position: relative;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+}
+.robot-head {
+    width: 120px;
+    height: 72px;
+    background: linear-gradient(180deg,#e6eefc, #cfe6ff);
+    border-radius: 16px;
+    margin: 0 auto;
+    position: relative;
+    top: 12px;
+}
+.eye {
+    width: 14px; height: 14px; background: #001; border-radius:50%;
+    position:absolute; top:24px;
+    box-shadow: 0 0 10px rgba(0,120,255,0.6);
+}
+.eye.left { left: 26px; animation: blink 4s infinite ease-in-out; }
+.eye.right { right: 26px; animation: blink 4s infinite ease-in-out 0.3s; }
+@keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    94% { transform: scaleY(0.1); }
+}
+.robot-body {
+    width: 140px; height: 84px;
+    background: linear-gradient(180deg,#bfe1ff, #94c5ff);
+    border-radius: 14px;
+    margin: 6px auto;
+}
+.robot-base {
+    width: 160px; height: 24px;
+    background: radial-gradient(circle at 50% 30%, #9ad1ff, #377bd6);
+    border-radius: 12px;
+    margin-top: 6px; opacity: .95;
+}
+
+/* patient summary styling */
+.patient-summary p { margin:8px 0; color: rgba(255,255,255,0.95); }
+
+/* Responsive */
+@media (max-width: 880px) {
+    .home-layout { padding-top: 100px; }
+    .home-left h1 { font-size: 32px; text-align:center; }
+    .home-left { text-align:center; width:100%; }
+}
+
