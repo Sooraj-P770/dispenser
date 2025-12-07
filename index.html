@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Medical Dispenser Robot</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Top Navigation -->
+     <h2 id="robotMsg">Waiting for robot status...</h2>
+
+    <header class="topnav">
+        <div class="logo">Medical Dispenser</div>
+        <nav>
+            <a onclick="showScreen('welcomeScreen')">Home</a>
+            <a onclick="showScreen('aboutScreen')">About</a>
+            <a onclick="showScreen('contactScreen')">Contact</a>
+            <a class="cta" onclick="showScreen('loginScreen')">Sign In</a>
+        </nav>
+    </header>
+
+    <!-- Main Screens -->
+    <main>
+        <section id="welcomeScreen" class="screen active home-layout">
+            <div class="home-left">
+                <h1>Automated Medical<br>Dispenser Robot</h1>
+                <p class="lead">
+                    Safe, reliable medicine delivery designed to assist nurses and improve patient care.
+                </p>
+                <div class="hero-buttons">
+                    <button onclick="showScreen('loginScreen')">Get Started</button>
+                    <button class="outline" onclick="showScreen('aboutScreen')">Learn More</button>
+                </div>
+            </div>
+
+            <div class="home-right">
+                <div class="robot-card">
+                    <div class="robot" id="heroRobot">
+                        <div class="robot-head">
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                        </div>
+                        <div class="robot-body"></div>
+                        <div class="robot-base"></div>
+                    </div>
+                    <p class="robot-caption">Your assistant on wheels 🤖</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="loginScreen" class="screen">
+            <div class="card">
+                <h2>Welcome, Nurse</h2>
+                <p>Click Login to enter username & password</p>
+                <button id="showLoginBtn" onclick="revealLogin()">Login</button>
+
+                <div id="loginForm" class="hidden-block">
+                    <input id="username" type="text" placeholder="Username" />
+                    <input id="password" type="password" placeholder="Password" />
+                    <div class="form-actions">
+                        <button onclick="attemptLogin()">Submit</button>
+                        <button class="outline" onclick="showScreen('welcomeScreen')">Cancel</button>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <section id="aboutScreen" class="screen">
+            <div class="card">
+                <h2>About</h2>
+                <p>This robot helps deliver medicines to patients automatically and enables nurses to update prescriptions remotely.</p>
+                <button class="outline" onclick="showScreen('welcomeScreen')">Back</button>
+            </div>
+        </section>
+
+        <section id="contactScreen" class="screen">
+            <div class="card">
+                <h2>Contact</h2>
+                <p>Email: support@robotcare.com</p>
+                <p>Phone: +91 98765 43210</p>
+                <button class="outline" onclick="showScreen('welcomeScreen')">Back</button>
+            </div>
+        </section>
+
+        <section id="dashboardScreen" class="screen">
+            <div class="card">
+                <h2>Robot Dashboard</h2>
+                <p>Status: <strong id="robotStatus">Idle</strong></p>
+                <p>Battery: <span id="robotBattery">92%</span></p>
+                <div class="form-actions">
+                    <button onclick="startDispenseFlow()">Dispense Medicine</button>
+                    <button class="outline" onclick="goHome()">Home</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="dispenseScreen" class="screen">
+            <div class="card">
+                <h2>Dispense</h2>
+                <p>Choose where the robot should go:</p>
+                <div class="bed-grid">
+                    <button onclick="showScreen('bedScreen')">Select Bed</button>
+                    <button class="outline" onclick="showScreen('dashboardScreen')">Back</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="bedScreen" class="screen">
+            <div class="card">
+                <h2>Select Bed</h2>
+                <div class="bed-grid">
+                    <button onclick="openPatient(1)">Bed 1 — John</button>
+                    <button onclick="openPatient(2)">Bed 2 — Riya</button>
+                    <button onclick="openPatient(3)">Bed 3 — Akash</button>
+                    <button onclick="openPatient(4)">Bed 4 — Mary</button>
+                </div>
+                <div style="margin-top:14px">
+                    <button class="outline" onclick="showScreen('dispenseScreen')">Back</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="patientScreen" class="screen">
+            <div class="card">
+                <h2 id="pTitle">Patient Information</h2>
+
+                <label class="lbl">Name</label>
+                <input id="pName" type="text"  />
+
+                <label class="lbl">Medicine</label>
+                <input id="pMed" type="text" />
+
+                <label class="lbl">Dose</label>
+                <input id="pDose" type="text" />
+
+                <label class="lbl">Schedule</label>
+                <input id="pSchedule" type="text" />
+
+                <div class="form-actions">
+                    <button onclick="savePatient()">Save & Send Robot</button>
+                    <button class="outline" onclick="showScreen('bedScreen')">Back</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="patientGreetingScreen" class="screen">
+            <div class="card">
+                <h2>🤖 Robot Arrived</h2>
+                <p id="greetingText">Hello — your medicine is here.</p>
+
+                <div class="patient-summary">
+                    <p><strong>Name:</strong> <span id="pgName"></span></p>
+                    <p><strong>Medicine:</strong> <span id="pgMedView"></span></p>
+                    <p><strong>Dose:</strong> <span id="pgDoseView"></span></p>
+                    <p><strong>Schedule:</strong> <span id="pgScheduleView"></span></p>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="confirmMedicine(true)">Yes, I received</button>
+                    <button class="outline" onclick="confirmMedicine(false)">Not yet / Problem</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="thankScreen" class="screen">
+            <div class="card">
+                <h2>🎉 Thank you!</h2>
+                <p id="finalMsg">Medicine delivered successfully.</p>
+                <div class="form-actions">
+                    <button onclick="showScreen('dashboardScreen')">Back to Dashboard</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCDOvjebFLwmNnUskeLopBqT7vX4p0zkQE",
+  authDomain: "medicine-6f6b4.firebaseapp.com",
+  projectId: "medicine-6f6b4",
+  storageBucket: "medicine-6f6b4.firebasestorage.app",
+  messagingSenderId: "965552398904",
+  appId: "1:965552398904:web:746f3fb0ddc31a27d83ccd",
+  measurementId: "G-53T2HKMV3L"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    </script>
+
+
+
+
+</body>
+
+
+</html>
