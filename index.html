@@ -7,6 +7,26 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- Firebase SDK -->
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Your friend's Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCDOvjebFLwmNnUskeLopBqT7vX4p0zkQE",
+      authDomain: "medicine-6f6b4.firebaseapp.com",
+      projectId: "medicine-6f6b4",
+      storageBucket: "medicine-6f6b4.firebasestorage.app",
+      messagingSenderId: "965552398904",
+      appId: "1:965552398904:web:746f3fb0ddc31a27d83ccd",
+      measurementId: "G-53T2HKMV3L"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    window.db = getFirestore(app);  // 👈 IMPORTANT: Makes Firestore available inside script.js
+    </script>
+
     <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
 </head>
