@@ -1,6 +1,14 @@
 /* ---------------------------
    Simple app state & patients
    --------------------------- */
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
 const patients = {
     1: { name: "John", med: "Paracetamol", dose: "1 Tablet", schedule: "9 AM" },
     2: { name: "Riya", med: "Cough Syrup", dose: "10 ml", schedule: "1 PM" },
