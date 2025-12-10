@@ -1,143 +1,128 @@
 // ------------------------
-// SCREEN NAVIGATION
+// FIREBASE IMPORTS
 // ------------------------
-function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+import {
+    doc, getDoc, setDoc,
+    onSnapshot, collection
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+
+// ------------------------
+// SCREEN SYSTEM
+// ------------------------
+export function showScreen(id) {
+    document.querySelectorAll(".screen")
+        .forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
 }
+window.showScreen = showScreen;
+
 
 // ------------------------
-// LOGIN LOGIC
+// LOGIN
 // ------------------------
-function revealLogin() {
+window.revealLogin = function () {
     document.getElementById("loginForm").classList.remove("hidden-block");
-}
+};
 
-function attemptLogin() {
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
+window.attemptLogin = function () {
+    const u = document.getElementById("username").value.trim();
+    const p = document.getElementById("password").value.trim();
 
-    if (user === "nurse" && pass === "1234") {
+    if (u === "nurse" && p === "1234") {
         alert("Login successful");
         showScreen("dashboardScreen");
     } else {
         alert("Invalid login");
     }
-}
+};
+
 
 // ------------------------
-// GLOBAL VARIABLES
+// PATIENT HANDLING
 // ------------------------
 let currentBed = null;
 
-// ------------------------
-// OPEN A PATIENT PROFILE
-// ------------------------
-import { doc, getDoc, setDoc } 
-from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+window.openPatient = async function (bed) {
+    currentBed = bed;
 
-async function openPatient(bedNo) {
-    currentBed = bedNo;
+    const ref = doc(window.db, "patients", "bed" + bed);
+    const snap = await getDoc(ref);
 
-    const bedRef = doc(window.db, "patients", "bed" + bedNo);
-    const bedSnap = await getDoc(bedRef);
+    document.getElementById("pTitle").innerText = "Bed " + bed;
 
-    document.getElementById("pTitle").innerText = "Bed " + bedNo + " — Patient";
-
-    if (bedSnap.exists()) {
-        const data = bedSnap.data();
-        document.getElementById("pName").value = data.name || "";
-        document.getElementById("pMed").value = data.med || "";
-        document.getElementById("pDose").value = data.dose || "";
-        document.getElementById("pSchedule").value = data.schedule || "";
-    } else {
-        // Empty fields if data not found
-        document.getElementById("pName").value = "";
-        document.getElementById("pMed").value = "";
-        document.getElementById("pDose").value = "";
-        document.getElementById("pSchedule").value = "";
+    if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById("pName").value = d.name || "";
+        document.getElementById("pMed").value = d.med || "";
+        document.getElementById("pDose").value = d.dose || "";
+        document.getElementById("pSchedule").value = d.schedule || "";
     }
 
     showScreen("patientScreen");
-}
+};
 
-// ------------------------
-// SAVE & SEND ROBOT
-// ------------------------
-async function savePatient() {
+
+window.savePatient = async function () {
     if (!currentBed) return;
 
-    const name = document.getElementById("pName").value;
-    const med = document.getElementById("pMed").value;
-    const dose = document.getElementById("pDose").value;
-    const schedule = document.getElementById("pSchedule").value;
+    const name = pName.value;
+    const med = pMed.value;
+    const dose = pDose.value;
+    const schedule = pSchedule.value;
 
-    const bedRef = doc(window.db, "patients", "bed" + currentBed);
-
-    await setDoc(bedRef, {
-        name,
-        med,
-        dose,
-        schedule,
+    await setDoc(doc(window.db, "patients", "bed" + currentBed), {
+        name, med, dose, schedule,
         robot_status: "moving"
     }, { merge: true });
 
-    alert("Saved! Robot is on the way.");
+    pgName.innerText = name;
+    pgMedView.innerText = med;
+    pgDoseView.innerText = dose;
+    pgScheduleView.innerText = schedule;
 
-    // Move to patient arrival greeting screen
-    document.getElementById("pgName").innerText = name;
-    document.getElementById("pgMedView").innerText = med;
-    document.getElementById("pgDoseView").innerText = dose;
-    document.getElementById("pgScheduleView").innerText = schedule;
-
+    alert("Robot is on the way!");
     showScreen("patientGreetingScreen");
-}
+};
+
 
 // ------------------------
-// PATIENT CONFIRMATION
+// CONFIRMATION
 // ------------------------
-async function confirmMedicine(received) {
-    const bedRef = doc(window.db, "patients", "bed" + currentBed);
-
-    await setDoc(bedRef, {
-        robot_status: received ? "delivered" : "problem"
+window.confirmMedicine = async function (ok) {
+    await setDoc(doc(window.db, "patients", "bed" + currentBed), {
+        robot_status: ok ? "delivered" : "problem"
     }, { merge: true });
 
-    document.getElementById("finalMsg").innerText =
-        received ? "Medicine delivered successfully!" : "Robot will re-check delivery.";
+    finalMsg.innerText = ok ?
+        "Medicine delivered successfully!" :
+        "Robot will re-check shortly.";
 
     showScreen("thankScreen");
-}
+};
+
 
 // ------------------------
 // DASHBOARD FLOW
 // ------------------------
-function startDispenseFlow() {
-    showScreen("dispenseScreen");
-}
+window.startDispenseFlow = () => showScreen('dispenseScreen');
+window.goHome = () => showScreen('welcomeScreen');
 
-function goHome() {
-    showScreen("welcomeScreen");
-}
 
 // ------------------------
-// OPTIONAL — AUTO ROBOT STATUS DISPLAY
+// LIVE ROBOT STATUS
 // ------------------------
-import { onSnapshot, collection } 
-from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const patientCol = collection(window.db, "patients");
 
-const pCol = collection(window.db, "patients");
-
-onSnapshot(pCol, snapshot => {
+onSnapshot(patientCol, snapshot => {
     let msg = "Robot Idle";
 
     snapshot.forEach(doc => {
         const d = doc.data();
-        if (d.robot_status === "moving") msg = "Robot moving to patient…";
-        if (d.robot_status === "delivered") msg = "Delivery completed.";
-        if (d.robot_status === "problem") msg = "Delivery encountered issue.";
+        if (d.robot_status === "moving") msg = "Robot moving…";
+        if (d.robot_status === "delivered") msg = "Delivery completed";
+        if (d.robot_status === "problem") msg = "Problem occurred!";
     });
 
     document.getElementById("robotMsg").innerText = msg;
 });
-
