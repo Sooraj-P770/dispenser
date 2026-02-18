@@ -6,7 +6,7 @@
     <title>Medical Dispenser Robot</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- Firebase (Modules Only) -->
+    <!-- ================= FIREBASE INITIALIZATION ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -21,13 +21,16 @@
             measurementId: "G-53T2HKMV3L"
         };
 
+        // Initialize Firebase app
         const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);   // Now script.js can use it
+
+        // Expose services globally
+        window.db = getFirestore(app);
+        window.firebaseApp = app;   // 🔴 CRITICAL FOR RTDB CONNECTION
     </script>
 </head>
 
 <body>
-
 
 <header class="topnav">
     <div class="logo">Medical Dispenser</div>
@@ -56,7 +59,7 @@
 
         <div class="home-right">
             <div class="robot-card">
-                <div class="robot" id="heroRobot">
+                <div class="robot">
                     <div class="robot-head">
                         <div class="eye left"></div>
                         <div class="eye right"></div>
@@ -113,21 +116,12 @@
             <h2>Robot Dashboard</h2>
             <p>Status: <strong id="robotStatus">Idle</strong></p>
             <p>Battery: <span id="robotBattery">92%</span></p>
-            <div class="form-actions">
-                <button onclick="startDispenseFlow()">Dispense Medicine</button>
-                <button class="outline" onclick="goHome()">Home</button>
-            </div>
-        </div>
-    </section>
 
-    <!-- DISPENSE -->
-    <section id="dispenseScreen" class="screen">
-        <div class="card">
-            <h2>Dispense</h2>
-            <p>Choose where the robot should go:</p>
-            <div class="bed-grid">
-                <button onclick="showScreen('bedScreen')">Select Bed</button>
-                <button class="outline" onclick="showScreen('dashboardScreen')">Back</button>
+           
+
+            <div class="form-actions">
+                <button onclick="showScreen('bedScreen')">Add Patients</button>
+                <button class="outline" onclick="logout()">Logout</button>
             </div>
         </div>
     </section>
@@ -137,13 +131,13 @@
         <div class="card">
             <h2>Select Bed</h2>
             <div class="bed-grid">
-                <button onclick="openPatient(1)">Bed 1 — John</button>
-                <button onclick="openPatient(2)">Bed 2 — Riya</button>
-                <button onclick="openPatient(3)">Bed 3 — Akash</button>
-                <button onclick="openPatient(4)">Bed 4 — Mary</button>
+                <button onclick="openPatient(1, 'John')">Bed 1 — John</button>
+                <button onclick="openPatient(2, 'Riya')">Bed 2 — Riya</button>
+                <button onclick="openPatient(3, 'Akash')">Bed 3 — Akash</button>
+                <button onclick="openPatient(4, 'Mary')">Bed 4 — Mary</button>
             </div>
             <div class="form-actions">
-                <button class="outline" onclick="showScreen('dispenseScreen')">Back</button>
+                <button class="outline" onclick="showScreen('dashboardScreen')">Back to Dashboard</button>
             </div>
         </div>
     </section>
@@ -153,36 +147,63 @@
         <div class="card">
             <h2 id="pTitle">Patient Info</h2>
 
-            <label class="lbl">Name</label>
+            <label class="lbl">Patient Name</label>
             <input id="pName" type="text">
 
-            <label class="lbl">Medicine</label>
-            <input id="pMed" type="text">
+            <label class="lbl">Select Medicine to Add</label>
+            <select id="medicineSelect">
+                <option value="">-- Select Medicine --</option>
+                <option value="Paracetamol">Paracetamol</option>
+                <option value="Amoxicillin">Amoxicillin</option>
+                <option value="Aspirin">Aspirin</option>
+                <option value="Ibuprofen">Ibuprofen</option>
+            </select>
 
-            <label class="lbl">Dose</label>
-            <input id="pDose" type="text">
+            <button class="small-btn" onclick="openMedicineScreen()">Add Medicine Details</button>
 
-            <label class="lbl">Schedule</label>
-            <input id="pSchedule" type="text">
+            <div id="medicineList"></div>
 
             <div class="form-actions">
-                <button onclick="savePatient()">Save & Send Robot</button>
-                <button class="outline" onclick="showScreen('bedScreen')">Back</button>
+                <button onclick="savePatient()">Save Patient</button>
+                <button class="outline" onclick="showScreen('bedScreen')">Cancel</button>
             </div>
         </div>
     </section>
 
-    <!-- GREETING -->
+    <!-- MEDICINE DETAILS -->
+    <section id="medicineScreen" class="screen">
+        <div class="card">
+            <h2>Medicine Details</h2>
+
+            <label class="lbl">Medicine Name</label>
+            <input id="mName" type="text" readonly>
+
+            <label class="lbl">Number of Tablets</label>
+            <div class="dose-counter">
+                <button onclick="changeDose(-1)">−</button>
+                <span id="doseCount">1</span>
+                <button onclick="changeDose(1)">+</button>
+            </div>
+
+            <label class="lbl">Time / Schedule</label>
+            <input id="mTime" type="text">
+
+            <div class="form-actions">
+                <button onclick="saveMedicine()">Save Medicine</button>
+                <button class="outline" onclick="showScreen('patientScreen')">Cancel</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PATIENT GREETING -->
     <section id="patientGreetingScreen" class="screen">
         <div class="card">
             <h2>🤖 Robot Arrived</h2>
-            <p id="greetingText">Hello — your medicine is here.</p>
+            <p id="greetingText"></p>
 
             <div class="patient-summary">
                 <p><strong>Name:</strong> <span id="pgName"></span></p>
-                <p><strong>Medicine:</strong> <span id="pgMedView"></span></p>
-                <p><strong>Dose:</strong> <span id="pgDoseView"></span></p>
-                <p><strong>Schedule:</strong> <span id="pgScheduleView"></span></p>
+                <div id="pgMedList"></div>
             </div>
 
             <div class="form-actions">
@@ -203,6 +224,7 @@
 
 </main>
 
+<!-- MAIN WEBSITE LOGIC -->
 <script type="module" src="script.js"></script>
 
 </body>
